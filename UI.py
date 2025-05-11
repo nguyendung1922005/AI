@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from Navie_Bayes import load_data, preprocess_data, result_probability
-
+#chạy lệnh này để run app:  streamlit run tên_file.py
 # Load Data
 history_df_full, recommend_df_full = load_data()
 

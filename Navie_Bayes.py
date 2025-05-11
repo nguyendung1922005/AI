@@ -5,26 +5,42 @@ def load_data():
     recommend_df_full = pd.read_csv('data/recommend_movie.csv')
     return history_df_full, recommend_df_full
 
+import copy
+
 def preprocess_data(df, recommend_df):
     df_proc = df.copy()
     recommend_df_proc = recommend_df.copy()
 
-    # Drop các cột Movie Name và Director
+    # Drop các cột không cần thiết
     for col in ["Movie Name", "Director"]:
         if col in df_proc.columns:
             df_proc = df_proc.drop(columns=[col])
         if col in recommend_df_proc.columns:
             recommend_df_proc = recommend_df_proc.drop(columns=[col])
 
-    # Chia khoảng Rating
-    bins = [0, 3, 6, 8, 10]
-    labels = ['Low', 'Medium', 'High', 'Very High']
-    df_proc['Rating'] = pd.cut(df_proc['Rating'], bins=bins, labels=labels, include_lowest=True)
-    recommend_df_proc['Rating'] = pd.cut(recommend_df_proc['Rating'], bins=bins, labels=labels, include_lowest=True)
+    # Hàm group_rating giống như bạn mô tả
+    def group_rating(data, index):
+        element = ['Low', 'Medium', 'High', 'Very High']
+        data_new = copy.deepcopy(data)
+        for row in data_new:
+            if row[index] <= 6:
+                row[index] = "Low"
+            elif row[index] <= 7.5:
+                row[index] = "Medium"
+            elif row[index] <= 9:
+                row[index] = "High"
+            else:
+                row[index] = "Very High"
+        return data_new
 
+    # Convert DataFrame sang list và group lại Rating
     attributes = list(df_proc.columns)
     data = df_proc.values.tolist()
     recommend_list = recommend_df_proc.values.tolist()
+
+    # Thực hiện nhóm rating
+    data = group_rating(data, attributes.index("Rating"))
+    recommend_list = group_rating(recommend_list, attributes.index("Rating"))
 
     return attributes, data, recommend_list
 
